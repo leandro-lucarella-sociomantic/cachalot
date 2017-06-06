@@ -1,0 +1,29 @@
+# We will use docker to set up out environment, so don't use any particular
+# language in Travis itself
+language: generic
+
+# Enable docker
+sudo: required
+services:
+    - docker
+
+env:
+    global:
+        - LATEST_DIST=xenial
+        - BRANCH="$TRAVIS_BRANCH"
+        - TAG="$TRAVIS_TAG"
+    matrix:
+        - DIST=trusty
+        - DIST=xenial
+
+script: make -Brj2 build
+
+deploy:
+    provider: script
+    script:
+        set -eux ;
+        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS" ;
+        make -rj2 push
+    skip_cleanup: true
+    on:
+        tags: true
